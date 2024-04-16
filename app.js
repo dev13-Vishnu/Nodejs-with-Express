@@ -6,6 +6,7 @@ const app = express();
 
 let movies = JSON.parse(fs.readFileSync('./data/movies.json'));
 
+app.use(express.json());
 
 //ROUTE = HTTP METHOD + URL
 // app.get('/',(req,res) =>{
@@ -15,15 +16,58 @@ let movies = JSON.parse(fs.readFileSync('./data/movies.json'));
 // });
 
 
-//GET - api/movies
-app.get('/api/movies',(req,res) => {
+//GET - api/v1/movies
+app.get('/api/v1/movies',(req,res) => {
     res.status(200).json({
         status: "success",
+        count: movies.length,
         data : {
             movies : movies
         }
     })
 });
+
+//GET - api/v1/movies/id
+app.get('/api/v1/movies/:id',(req,res) => {
+    
+    const id = req.params.id * 1;
+    let movie = movies.find(el => el.id === id);
+
+    if(!movie) {
+        return res.status(404).json({
+            status : "fail",
+            message : "Movie with ID '" + id + "' not found"
+        })
+    }
+
+    res.status(200).json({
+        status:"success",
+        data : {
+            movie : movie
+        }
+    });
+})
+
+//POST - api/v1/movies
+
+app.post('/api/v1/movies',(req,res) => {
+    const newId = movies[movies.length-1].id + 1;
+    const newMovie = Object.assign({id : newId},req.body)
+
+    movies.push(newMovie);
+
+    fs.writeFile('./data/movies.json',JSON.stringify(movies),(err) => {
+        res.status(201).json({
+            status : "success",
+            data : {
+                movie : newMovie
+            }
+        })
+    })
+    // res.send('Created');
+    // console.log(req.body);
+});
+
 
 //CREATE SERVER
 const port = 3004;
