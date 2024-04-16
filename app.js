@@ -6,7 +6,21 @@ const app = express();
 
 let movies = JSON.parse(fs.readFileSync('./data/movies.json'));
 
+const logger = function (req,res,next){
+    console.log('Custom Middeleware called');
+    next();
+}
+
+
 app.use(express.json());
+app.use(logger);
+app.use((req,res,next) =>{
+    req.requestedAt= new Date().toISOString();
+    next();
+})
+
+
+
 
 //ROUTE = HTTP METHOD + URL
 // app.get('/',(req,res) =>{
@@ -18,6 +32,7 @@ app.use(express.json());
 const getAllMovies = (req,res) => {
     res.status(200).json({
         status: "success",
+        time: req.requestedAt,
         count: movies.length,
         data : {
             movies : movies
@@ -118,13 +133,19 @@ const deleteMovie = (req,res) =>{
 // app.patch('/api/v1/movies/:id',updateMovie);
 // app.delete('/api/v1/movies/:id',deleteMovie);
 
-app.route('/api/v1/movies')
+const moviesRouter = express.Router();
+
+moviesRouter.route('/')
 .get(getAllMovies)
 .post(createMovie);
-app.route('/api/v1/movies/:id')
+
+
+moviesRouter.route('/:id')
 .get(getMovie)
 .patch(updateMovie)
 .delete(deleteMovie);
+
+app.use('/api/v1/movies',moviesRouter);
 
 //CREATE SERVER
 const port = 3004;
