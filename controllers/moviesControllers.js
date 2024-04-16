@@ -45,7 +45,7 @@ exports.getMovie = (req,res) => {
     });
 };
 exports.validateBody = (req,res,next) =>{
-    if(!req.body.name || req.body.relaseYear) {
+    if(!req.body.name || !req.body.releaseYear) {
         return res.status(400).json({
             status: "fail",
             message: "invalid request"

@@ -13,6 +13,7 @@ const logger = function (req,res,next){
 
 app.use(express.json());
 app.use(logger);
+app.use(express.static('./public'))
 app.use((req,res,next) =>{
     req.requestedAt= new Date().toISOString();
     next();
